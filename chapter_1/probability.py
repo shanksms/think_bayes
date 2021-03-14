@@ -3,6 +3,14 @@ import pandas as pd
 def load_gss_data():
     return pd.read_csv('35478-0001-Data.tsv', sep='\t', index_col=1)
 
+def bankers_boolean_series(gss_dataframe):
+    return (gss_dataframe['INDUS10'] == 6870)
+def democrat_boolean_series(gss_dataframe):
+    return (gss_dataframe['PARTYID'] <= 1)
+def liberal_boolean_series(gss_dataframe):
+    return (gss_dataframe['POLVIEWS'] <= 3)
+def female_boolean_series(gss_dataframe):
+    return  (gss_dataframe['SEX'] == 2)
 def bankers_probability(gss_dataframe):
     bankers = (gss_dataframe['INDUS10'] == 6870)
     return compute_probability(bankers)
@@ -27,6 +35,45 @@ def liberal_probability(gss_dataframe):
     '''
     liberal = (gss_dataframe['POLVIEWS'] <= 3)
     return  compute_probability(liberal)
+def political_affiliations(gss_dataframe):
+    '''
+
+    :param gss_dataframe:
+    :return:
+    '''
+    '''
+    0   Strong democrat
+    1   Not strong democrat
+    2   Independent, near democrat
+    3   Independent
+    4   Independent, near republican
+    5   Not strong republican
+    6   Strong republican
+    7   Other party
+    I’ll define democrat to include respondents who chose “Strong democrat” or “Not strong democrat”:
+    '''
+    return compute_probability((gss_dataframe['PARTYID'] <= 1))
+
+def democrat_and_banker(gss_dataframe):
+    '''
+
+    :param gss_dataframe:
+    :return:
+    Now that we have a definition of probability and a function that computes it, let’s move on to conjunction.
+
+“Conjunction” is another name for the logical and operation. If you have two propositions, A and B,
+ the conjunction A and B is True if both A and B are True, and False otherwise.
+ If we have two Boolean series, we can use the & operator to compute their conjunction. For example,
+  we have already computed the probability that a respondent is a banker.
+    '''
+    return compute_probability(bankers_boolean_series(gss_dataframe) & democrat_boolean_series(gss_dataframe))
+def given_female_probaility_of_liberal(gss_dataframe):
+    liberal = liberal_boolean_series(gss_dataframe)
+    female = female_boolean_series(gss_dataframe)
+    return compute_conditional_probability(liberal, given=female)
+def compute_conditional_probability(proposition, given):
+    """Probability of A conditioned on given."""
+    return compute_probability(proposition[given])
 def compute_probability(A):
     """Computes the probability of a proposition, A."""
     '''
@@ -50,4 +97,4 @@ def compute_probability(A):
 
 
 if __name__ == '__main__':
-    print(liberal_probability(load_gss_data()))
+    print(given_female_probaility_of_liberal(load_gss_data()))
